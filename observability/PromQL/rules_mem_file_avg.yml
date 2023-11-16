@@ -1,0 +1,9 @@
+groups:
+  - name: node_memoryFree_percent
+    interval: 60m
+    rules:
+      - record: node_memory_memFree_percent
+        expr: 100 - (100 * node_memory_MemFree_bytes / node_memory_MemTotal_bytes)
+
+      - record: node_filesystem_free_percent
+        expr: 100 * node_filesystem_free_bytes / node_filesystem_size_bytes
