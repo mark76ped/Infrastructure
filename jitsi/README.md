@@ -72,6 +72,26 @@ Then follow the instructions in the script and save the information for the clie
 ```
 sudo cat /root/wg0-client-<name of server>.conf
 ```
+Confirm the WireGuard connection is successful
+```
+$sudo wg show
+interface: wg0
+  public key: <public key info appears here>
+  private key: (hidden)
+  listening port: <port must match ACL>
+
+peer: <peer info appears here>
+  preshared key: (hidden)
+  endpoint: <on-prem IP appears here>:<random port>
+  allowed ips: 10.66.66.2/32
+  latest handshake: 1 minute, 3 seconds ago
+  transfer: 475.29 MiB received, 1.05 GiB sent
+```
+If successful you should see a handshake value, as well as data received and sent.
+You can also confirm with pinging between hosts.
+
+Tip: 
+-  If WireGuard goes down, first try a `sudo wg-quick down`, `sudo wg-quick up` on the client side. Restarting the service resets any iptable/ufw change that may be preventing the connection from establishing.
 
 ## Jitsi Docker Containers 
 On the on premises Ubuntu Server 
@@ -138,7 +158,7 @@ services:
 ```
 docker-compose up -d
 ```
-- Check Oracle Cloud ACL and all for port tcp/81 connections from your public IP. This restricts access to the admin portal of the nginx-proxy-manager page.
+- Check Oracle Cloud ACL for port tcp/81 connections from your public IP. This restricts access to the admin portal of the nginx-proxy-manager page.
 - Log into the Admin Portal
 ```
 http://$Your_Oracle_Cloud_Public_IP:81
