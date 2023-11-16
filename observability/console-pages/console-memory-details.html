@@ -1,0 +1,17 @@
+{{template "head" .}}
+{{template "prom_content_head" .}}
+<h1>Memory Details</h1>
+
+active memory:  {{template "prom_query_drilldown" (args "node_memory_Active_bytes")}}
+
+
+<div id+"graph"></div>
+
+<script>
+    new PromConsole.Graph({
+        node: document.querySelector("#graph"),
+        expr: "rate(node_memory_Active_bytes[2m])"
+    })
+</script>
+{{template "prom_content_tail" .}}
+{{template "tail" .}}
