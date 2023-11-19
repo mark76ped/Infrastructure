@@ -1,0 +1,79 @@
+---
+- hosts: {{ web_svr }}
+  tasks:
+  - name: Install httpd package
+    yum: name=httpd state=installed
+
+---
+- name: Start httpd
+  hosts: all
+  gather_facts: no
+  tasks:
+    - name: Start httpd service
+      service:
+        name: httpd
+        state: started
+        enabled: true
+
+---
+- hosts: all
+  gather_facts: no
+  tasks:
+    - name: Install nginx
+      yum:
+        name: nginx
+        state: present
+
+    - name: Start and enable Nginx
+      service:
+        name: nginx
+        state: started
+        enabled: yes
+        
+---
+- hosts: all
+  gather_facts: no
+  tasks:
+    - name: Make changes in Apache config
+      replace:
+        path: /etc/httpd/conf/httpd.conf
+        regexp: "^Listen 80"
+        replace: "Listen 443"
+
+    - name: Restart Apache
+      service:
+        name: httpd
+        state: restarted
+
+---
+- hosts: all
+  gather_facts: no
+  tasks:
+    - name: Copy Apache welcome file
+      copy:
+        src: index.html
+        dest: /var/www/html/index.html
+    - service:
+        name: httpd
+        state: reloaded
+
+---
+- hosts: {{ web_svr }}
+  tasks:
+  - yum:
+      name: http://mirror.centos.org/centos/7/os/x86_64/Packages/wget-1.14-18.el7_6.1.x86_64.rpm
+      state: present
+
+---
+- hosts: all
+  tasks:
+    - name: Install iotop package
+      yum:
+        name: iotop
+        state: latest
+
+---
+- hosts: web1
+  tasks:
+  - yum: name=sudo state=latest
+  - yum: name=vsftpd-2.2.2 state=present allow_downgrade=yes

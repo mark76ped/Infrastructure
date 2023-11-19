@@ -1,0 +1,70 @@
+---
+- name: Firewalld
+  hosts: all
+  gather_facts: no
+  tasks:
+    - name: Install Firewalld
+      yum:
+        name: firewalld
+        state: present
+    
+
+#whitelisting an IP
+---
+- hosts: web1
+  tasks:
+   - firewalld:
+      source: 172.20.1.101
+      state: enabled
+      zone: internal
+      permanent: yes
+      immediate: yes
+
+---
+- hosts: web1
+  name: block udp port 161
+  tasks:
+   - firewalld:
+        port: 161/udp
+        zone: block
+        permanent: yes
+        immediate: yes
+        state: enabled
+
+---
+- hosts: web1
+  name: Allow internal https
+  tasks:
+   - firewalld:
+        source: 172.20.1.2
+        service: https
+        zone: internal
+        permanent: yes
+        state: enabled
+
+   - service:
+       name: firewalld
+       state: reloaded
+
+---
+- hosts: web1
+  name: Allow internal https
+  tasks:
+   - firewalld:
+        source: 172.20.1.2
+        service: ssh
+        zone: internal
+        permanent: yes
+        state: enabled
+
+   - service:
+       name: firewalld
+       state: reloaded
+
+---
+    - hosts: web1
+      name: Start Firewalld (this starts blocking connections)
+      service:
+        name: firewalld
+        state: started
+        enabled: true
