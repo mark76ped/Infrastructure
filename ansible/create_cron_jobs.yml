@@ -1,0 +1,53 @@
+---
+- name: Create cron job to clear lastlog
+  hosts: node00
+  tasks:
+     - cron:
+         name: "Free Memory Check"
+         minute: "0"
+         hour: "*/2"
+         job: "sh /root/free.sh"
+
+
+---
+- name: Create cron job to clear lastlog
+  hosts: node00
+  tasks:
+     - cron:
+         name: create cron job to clear lastlog
+         hour: "0"
+         minute: "0"
+         job: echo "" > /var/log/lastlog
+
+
+---
+- name: Remove cron job
+  hosts: node00
+  tasks:
+     - cron:
+           name: "Check Memory"
+           state: absent
+
+
+---
+- name: Clean /tmp/ after reboot
+  hosts: node00
+  tasks:
+     - cron:
+           name: "cleanup"
+           special_time: reboot
+           job: rm -rf /tmp/*
+
+
+---
+- name: Create Cron for Yum Update
+  hosts: node00
+  tasks:
+     - cron:
+           name: yum update
+           minute: 5
+           hour: 8
+           weekday: 0
+           user: root
+           job: "yum -y update"
+           cron_file: ansible_yum
