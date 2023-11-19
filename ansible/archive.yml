@@ -1,0 +1,81 @@
+---
+- name: Archive File
+  hosts: web1
+  gather_facts: no
+  tasks:
+      - archive:
+          path: /opt
+          dest: /root/opt.zip
+          format: zip
+
+#transfer zip file from ansible control server to target host
+---
+- name: Transfer Archive File
+  hosts: web1
+  gather_facts: no
+  tasks:
+      - unarchive:
+           src: local.zip
+           dest: /tmp
+
+- name: Extract Archived File Already on Target
+  hosts: web1
+  gather_facts: no
+  tasks:
+      - unarchive:
+           src: /root/data.tar.gz
+           dest: /srv
+           remote_src: yes
+
+      - file:
+           path: /root/data.tar.gz
+           state: absent
+
+---
+- name: Download Archived File
+  hosts: web1
+  tasks:
+       - unarchive:
+            src: https://github.com/kodekloudhub/Hello-World/archive/master.zip
+            dest: /root
+            remote_src: yes
+
+
+- name: Compress multiple files
+  hosts: web1
+  tasks:
+  - archive:
+     path:
+      - /root/file1.txt
+      - /usr/local/share/file2.txt
+      - /var/log/lastlog
+     dest: /root/files.tar.bz2
+     format: bz2
+
+
+
+---
+- name: Install nginx, extract files, and write files to index.html
+  hosts: web1
+  gather_facts: no
+  tasks:
+    - name: Install nginx
+      yum:
+        name: nginx
+        state: present
+
+    - name: Start and enable Nginx
+      service:
+        name: nginx
+        state: started
+        enabled: yes
+
+    - unarchive:
+        src: /root/nginx.zip
+        dest: /usr/share/nginx/html
+        remote_src: yes
+
+    - lineinfile:
+        path: /usr/share/nginx/html/index.html
+        regexp: 'This is sample html code'
+        line: This is KodeKloud Ansible lab
