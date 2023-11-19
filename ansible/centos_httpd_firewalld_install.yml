@@ -1,0 +1,45 @@
+#Install httpd, firewalld and enable rules in one playbook
+---
+- hosts: web2
+  tasks:
+    - name: Install httpd
+      yum: 
+        name: httpd 
+        state: installed
+
+    - name: Change Apache port
+      replace:
+        path: /etc/httpd/conf/httpd.conf
+        regexp: "Listen 80"
+        replace: "Listen 8082"
+
+    - name: Restart Apache service
+      service:
+        name: httpd
+        state: restarted
+    
+    - name: Install Firewalld
+      yum:
+        name: firewalld
+        state: present
+  
+    - name: Add ssh Firewalld rule
+      firewalld:
+        source: 0.0.0.0
+        service: ssh
+        zone: internal
+        permanent: yes
+        state: enabled
+
+    - name:  Add 8082 Firewalld rule
+      firewalld:
+        source: 0.0.0.0
+        port: 8082/tcp
+        zone: public
+        permanent: yes
+        state: enabled
+
+    - name: Start Firewalld
+      firewalld:
+        state: started
+        enabeled: true
