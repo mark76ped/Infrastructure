@@ -1,0 +1,32 @@
+#create_user.yml
+---
+- hosts: all
+  gather_facts: no
+  tasks:
+    - group:
+        name: 'admin'
+        state: present
+    - user:
+        name: 'admin'
+        uid: 2048
+        group: 'admin'
+
+---
+#adds user for temp time
+- hosts: all
+  gather_facts: no
+  tasks:
+    - user:
+        name: 'neymarsabin'
+        expires: 1704067199
+
+---
+#removes users
+- hosts: all
+  gather_facts: no
+  tasks:
+    - user:
+        name: 'admin'
+        uid: 2048
+        state: absent
+        remove: yes
