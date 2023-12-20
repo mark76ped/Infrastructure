@@ -1,1 +1,115 @@
-#conf file for mark-pedersen.com and meet.mark-pedersen.com
+# ------------------------------------------------------------
+# mark-pedersen.com
+# ------------------------------------------------------------
+user #hidden;
+
+worker_processes auto;
+
+events {
+    worker_connections  1024; # The maximum number of simultaneous connections that can be opened by a worker process
+}
+
+http {
+    include       mime.types; # File that maps file extensions to MIME types
+    default_type  application/octet-stream;
+
+    #gzip enables compresseion requests to keep performance up
+    gzip on;
+    gzip_comp_level 3;
+    gzip_types text/css;
+    gzip_types text/javascript;
+
+    sendfile        on; # Allows to use sendfile system call to speed up static file serving
+    keepalive_timeout  65; # The timeout for keep-alive connections with the client
+
+    #meet.mark-pedersen.com
+    server {
+    set $forward_scheme https;
+    set $server         "my.proxied.ip";
+    set $port           #securessl;
+    listen 80;
+    listen [::]:80;
+    listen 443 ssl http2;
+    listen [::]:443 ssl http2;
+    server_name meet.mark-pedersen.com;
+    # Let's Encrypt SSL
+    include letsencrypt-acme-challenge.conf;
+    ssl_ciphers 'ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305:ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-SHA384:ECDHE-RSA-AES256-SHA384:ECDHE-ECDSA-AES128-SHA256:ECDHE-RSA-AES128-SHA256:!AECDH:!MD5';
+    ssl_certificate /etc/publickeyfile;
+    ssl_certificate_key /etc/privkeyfile;
+    # Block Exploits
+    include block-exploits.conf;
+
+    proxy_set_header Upgrade $http_upgrade;
+    proxy_set_header Connection $http_connection;
+    proxy_http_version 1.1;
+
+
+      #access_log /logs/proxy-host-1_access.log;
+      #error_log /logs/proxy-host-1_error.log warn;
+
+      location /xmpp-websocket {
+      proxy_pass https://localhost:proxiedport;
+      proxy_http_version 1.1;
+      proxy_set_header Upgrade $http_upgrade;
+      proxy_set_header Connection "upgrade";
+      }
+      location /colibri-ws {
+      proxy_pass https://localhost:proxiedport;
+      proxy_http_version 1.1;
+      proxy_set_header Upgrade $http_upgrade;
+      proxy_set_header Connection "upgrade";
+      }
+      location / {
+      # Authorization
+      auth_basic            "Authorization required";
+      auth_basic_user_file passwrd_file;
+      proxy_set_header Authorization "";
+      # Access Rules: 0 total
+      #deny all;
+      # Access checks must...
+      satisfy any;
+      proxy_set_header Upgrade $http_upgrade;
+      proxy_set_header Connection $http_connection;
+      proxy_http_version 1.1;
+      # Proxy
+      include proxy.conf;
+                 }
+    }
+    #mark-pedersen.com
+    server {
+    listen 80;
+    listen 443 ssl http2;
+    server_name mark-pedersen.com;
+    root /usr/share/nginx/html;
+    index  index.html index.htm;
+
+    # Let's Encrypt SSL
+    include letsencrypt-acme-challenge.conf;
+    ssl_ciphers 'ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305:ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-SHA384:ECDHE-RSA-AES256-SHA384:ECDHE-ECDSA-AES128-SHA256:ECDHE-RSA-AES128-SHA256:!AECDH:!MD5';
+
+    ssl_certificate /etc/keyfile;
+    ssl_certificate_key /etc/privkeyfile;
+
+    # Block Exploits
+    include block-exploits.conf;
+
+    #http2 push drastically reduces resource request time
+    #location = /index.html {
+    #   http2_push /profi.jpg;
+    #   http2_push /style.css;
+    #    }
+    #Internal redirect all requests to root
+    location / {
+        try_files $uri $uri/ /index.html;
+        }
+    location ~*.(css|js|jpg|png)$ {
+        #this location block will improve performance by allowing browsers to cache files lowering the number of requests
+        access_log off;
+        add_header Cache-Control "public, max-age=3600";
+        add_header Pragma public;
+        add_header Vary Accept-Encoding;
+        expires 60m;
+        }
+      }
+    }
