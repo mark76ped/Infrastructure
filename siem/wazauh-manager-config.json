@@ -1,0 +1,57 @@
+<!--
+Rules to automatically create IP table entries to block malicious actors from continuing to scan/attack your resource
+-->
+
+  <!--
+  Rule to block all IP's that attempt to ssh into the server with the incorrect username. As part of defense in depth; this is the third line of defense to prevent an attacker from gaining ssh access to a resource.
+  The first two lines of defense are an ACL limiting IP's that can connect via SSH port 22 to the resource, as well as disabling password SSH connections for only allowing certificate authentication.
+  The rule auto blocks the IP for 180 seconds. 
+  -->
+  <active-response>
+    <command>firewall-drop</command>
+    <location>local</location>
+    <rules_id>5710</rules_id>
+    <timeout>180</timeout>
+  </active-response>
+
+
+  <!--
+  Rule to block all IP's that receive a 400 level response from the webserver. 31101 rule_id is the "Web server 400 error code".
+  This drastically cuts down on any errors/malicious traffic.
+  The rule auto blocks the IP for 10 minutes. 
+  -->
+  <active-response>
+    <command>firewall-drop</command>
+    <location>local</location>
+    <rules_id>31101</rules_id>
+    <timeout>600</timeout>
+  </active-response>
+
+
+
+<!--
+Virus Total Configuration to remove threats automatically if placed on a wazuh-agent resource. rule_id's must match the rule_id's of the local-rules.xml in order to function correctly.
+-->
+<ossec_config>
+  <integration>
+    <name>virustotal</name>
+    <api_key><ENTER API KEY HERE></api_key> <!-- Replace with your VirusTotal API key -->
+    <rule_id>100200,100201</rule_id>
+    <alert_format>json</alert_format>
+  </integration>
+</ossec_config>
+
+<ossec_config>
+  <command>
+    <name>remove-threat</name>
+    <executable>remove-threat.sh</executable>
+    <timeout_allowed>no</timeout_allowed>
+  </command>
+
+  <active-response>
+    <disabled>no</disabled>
+    <command>remove-threat</command>
+    <location>local</location>
+    <rules_id>87105</rules_id>
+  </active-response>
+</ossec_config>
