@@ -27,6 +27,29 @@ Rules to automatically create IP table entries to block malicious actors from co
     <timeout>600</timeout>
   </active-response>
 
+  <!--
+  Rule to block all IP's that receive an SQL injection attack. 31103 rule_id is the ID for an SQL injection attack detection.
+  This drastically cuts down on any errors/malicious traffic.
+  The rule auto blocks the IP for 10 minutes. 
+  -->
+  <active-response>
+    <command>firewall-drop</command>
+    <location>local</location>
+    <rules_id>31103</rules_id>
+    <timeout>600</timeout>
+  </active-response>
+
+  <!--
+  Rule to block all IP's that receive a 200 level response from the webserver but has been detected an attack. 31106 rule_id is the "A web attack returned code 200 (success)".
+  This drastically cuts down on any errors/malicious traffic.
+  The rule auto blocks the IP for 10 minutes. 
+  -->
+  <active-response>
+    <command>firewall-drop</command>
+    <location>local</location>
+    <rules_id>31106</rules_id>
+    <timeout>600</timeout>
+  </active-response>
 
 
 <!--
