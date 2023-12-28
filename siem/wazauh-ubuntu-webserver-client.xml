@@ -1,0 +1,13 @@
+<!--
+Found in the /var/ossec/etc/ossec.conf file. These ensure the Wazuh client sends the correct log files to the Wazuh server to collect logs and activate policies.
+-->
+
+  <localfile>
+    <log_format>syslog</log_format>
+    <location><hidden path>logs/access.log</location>
+  </localfile>
+
+  <localfile>
+    <log_format>syslog</log_format>
+    <location><hidden path>logs/error.log</location>
+  </localfile>
