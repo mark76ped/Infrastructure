@@ -1,0 +1,14 @@
+---
+- name: Configure UFW to allow SSH and enable UFW
+  hosts: all #make sure to use --limit {{{ target devices }}} to only push to devices you want to have this configuration
+  become: yes  # Use sudo to elevate privileges
+  tasks:
+    - name: Allow SSH connections on port 22
+      ansible.builtin.ufw:
+        rule: allow
+        name: OpenSSH
+
+    - name: Enable UFW
+      ansible.builtin.ufw:
+        state: enabled
+        policy: allow  # Sets the default policy to allow
