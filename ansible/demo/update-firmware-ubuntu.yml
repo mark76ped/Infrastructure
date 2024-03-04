@@ -1,0 +1,26 @@
+---
+- name: Update firmware on Ubuntu servers
+  hosts: webservers
+  become: yes  # Use sudo to execute tasks
+  tasks:
+    - name: Update all packages to the latest version
+      apt:
+        update_cache: yes
+        upgrade: dist
+      register: update_result
+
+    - name: Install the linux-firmware package
+      apt:
+        name: linux-firmware
+        state: latest
+      register: firmware_result
+
+    - name: Reboot the server if required
+      reboot:
+        msg: "Rebooting for firmware update"
+        connect_timeout: 5
+        reboot_timeout: 600
+        pre_reboot_delay: 0
+        post_reboot_delay: 60
+        test_command: uptime
+      when: update_result.changed or firmware_result.changed
