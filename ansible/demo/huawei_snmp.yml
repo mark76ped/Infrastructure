@@ -1,0 +1,22 @@
+---
+- name: Update SNMP ACL on Huawei Device
+  hosts: huawei_routers  # Define your inventory group
+  gather_facts: no
+  connection: netconf  # Using NETCONF for network device configuration
+
+  tasks:
+  
+    - name: Add new SNMP ACL rule
+      huawei.cloudengine.ce_acl: 
+        acl_name: 'name'  
+        state: present
+        rule_name: {{ acl_rule_number }}
+        rule_action: permit
+        source_ip: '10.20.30.40'
+        source_wildcard: '0.0.3.255'
+
+    - name: Save configuration
+      huawei.cloudengine.ce_command:
+        commands:
+          - save
+        wait_for: 'Save the configuration successfully.'
