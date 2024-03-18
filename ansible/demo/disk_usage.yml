@@ -1,0 +1,11 @@
+---
+- name: Example playbook for register usage
+  hosts: all
+  tasks:
+    - name: Check disk usage
+      ansible.builtin.shell: df -h
+      register: disk_usage  # Store the output of the command in the variable 'disk_usage'
+
+    - name: Print disk usage
+      ansible.builtin.debug:
+        msg: "{{ disk_usage.stdout }}"  # Use the stored output for further actions
