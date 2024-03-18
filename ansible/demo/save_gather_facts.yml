@@ -1,0 +1,14 @@
+---
+- name: Gather and save facts
+  hosts: all
+  become: no  # Becoming root is not necessary for gathering facts
+  tasks:
+    - name: Gather facts
+      ansible.builtin.setup:
+
+    - name: Save gathered facts to a local file
+      ansible.builtin.copy:
+        content: "{{ ansible_facts | to_nice_json }}"
+        dest: "/path/to/local/facts/{{ inventory_hostname }}_facts.json"
+      delegate_to: localhost
+      run_once: true
