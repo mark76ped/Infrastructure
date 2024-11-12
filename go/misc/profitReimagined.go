@@ -1,4 +1,4 @@
-package main
+package profitReimagined
 
 import (
 	"fmt"
